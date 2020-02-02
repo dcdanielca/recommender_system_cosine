@@ -22,7 +22,7 @@ def cosine_similarity(c1, c2):
 
     # convert to word-vectors
     words = list(c1_vals.keys() | c2_vals.keys())
-    c1_vect = [c1_vals.get(word, 0) for word in words]
+    c1_vect = [c1_vals.get(word, 0) for word in words]  
     c2_vect = [c2_vals.get(word, 0) for word in words]
 
     # find cosine
@@ -35,8 +35,9 @@ def cosine_similarity(c1, c2):
 
 def recomendar(caracteristicas):
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT users.id AS id_sitio, establecimiento.nombre AS tipo_establecimiento,
-                comida.nombre AS tipo_comida, musica.nombre AS tipo_musica, ambiente.nombre AS tipo_ambiente
+    cur.execute("""SELECT users.id AS id_sitio, users.nick AS nick, users.name AS nombre, users.surname AS surname, users.image AS image,
+                establecimiento.nombre AS tipo_establecimiento, comida.nombre AS tipo_comida, 
+                musica.nombre AS tipo_musica, ambiente.nombre AS tipo_ambiente
                 FROM users 
                 INNER JOIN establecimiento
                 ON establecimiento.id_tipo_establecimiento = users.tipo_establecimiento
@@ -50,9 +51,9 @@ def recomendar(caracteristicas):
 
     similaridades = []
     for row in cur.fetchall():
-        cosine = cosine_similarity(caracteristicas, row[1:])
+        cosine = cosine_similarity(caracteristicas, row[5:])
         if cosine != 0:
-            similaridades.append({'sitio_id': row[0], "similaridad": cosine})
+            similaridades.append({'sitio_id': row[0], 'nick': row[1], 'name': row[2], 'surname': row[3], 'image': row[4], "similaridad": cosine*100})
 
     return sorted(similaridades, key=lambda k: k['similaridad'], reverse=True)
 
